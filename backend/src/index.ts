@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
+import userRoutes from './api/userRoutes'
 
 dotenv.config()
 
@@ -17,6 +18,9 @@ app.use(express.json())
 app.get('/api/health', (req: Request, res: Response) => {
   res.json({ status: 'UP', time: new Date().toISOString() })
 })
+
+// 集成API路由
+app.use('/api/user', userRoutes)
 
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`)
