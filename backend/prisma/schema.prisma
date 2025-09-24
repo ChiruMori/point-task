@@ -10,15 +10,70 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model User {
-    id    Int    @id @default(autoincrement())
-    uname String @unique
-    pwd   String // 密码哈希
-    role  Role   @default(normal)
-    point Int    @default(0)
-}
-
 enum Role {
     admin
     normal
+}
+
+model User {
+    id         Int      @id @default(autoincrement())
+    uname      String   @unique
+    pwd        String // 密码哈希
+    role       Role     @default(normal)
+    point      Int      @default(0)
+    createTime DateTime @default(now())
+    updateTime DateTime @updatedAt
+}
+
+enum TaskFrequency {
+    once
+    daily
+    workday
+    weekend
+    endless
+}
+
+enum TaskStatus {
+    editing
+    active
+    completed
+    expired
+}
+
+model Task {
+    id         Int           @id @default(autoincrement())
+    title      String
+    desc       String?
+    freq       TaskFrequency @default(once)
+    status     TaskStatus    @default(editing)
+    creatorId  Int
+    rewardId   Int
+    deadline   DateTime?
+    createTime DateTime      @default(now())
+    updateTime DateTime      @updatedAt
+    // 不使用外键约束，手动管理
+    // creator  User  @relation("CreatedTasks", fields: [creatorId], references: [id])
+    // assignee User? @relation("AssignedTasks", fields: [assigneeId], references: [id])
+}
+
+model Reward {
+    id         Int      @id @default(autoincrement())
+    fx         String // 奖励计算函数代码
+    maxInput   Int
+    minInput   Int
+    createTime DateTime @default(now())
+    updateTime DateTime @updatedAt
+}
+
+model TaskRecord {
+    id            Int      @id @default(autoincrement())
+    taskId        Int
+    userId        Int
+    score         Int // 任务完成时的评分（1-5）
+    pointsAwarded Int // 实际奖励的积分
+    createTime    DateTime @default(now()) // 视为完成时间
+    updateTime    DateTime @updatedAt
+    // 不使用外键约束，手动管理
+    // task Task @relation(fields: [taskId], references: [id])
+    // user User @relation(fields: [userId], references: [id])
 }
