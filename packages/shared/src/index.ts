@@ -43,6 +43,7 @@ export interface TaskRecord {
   userId: number
   score: number // 任务完成时的评分（1-5）
   pointsAwarded: number // 实际奖励的积分
+  ratio: number // 任务完成时的附加修正比例
   createTime: Date // 视为完成时间
   updateTime: Date
 }

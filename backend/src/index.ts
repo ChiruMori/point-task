@@ -2,6 +2,8 @@ import express, { Request, Response } from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import userRoutes from './api/userRoutes'
+import { checkAuth } from './middleware/auth'
+import { expHandler } from './middleware/expHandler'
 
 dotenv.config()
 
@@ -13,6 +15,9 @@ const port = process.env.PORT || 3001
 app.use(cors())
 // 解析JSON请求体
 app.use(express.json())
+
+app.use(checkAuth)
+app.use(expHandler)
 
 // 心跳接口
 app.get('/api/health', (req: Request, res: Response) => {

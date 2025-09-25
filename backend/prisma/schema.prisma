@@ -70,6 +70,7 @@ model TaskRecord {
     taskId        Int
     userId        Int
     score         Int // 任务完成时的评分（1-5）
+    ratio         Float // 任务完成时的附加修正比例
     pointsAwarded Int // 实际奖励的积分
     createTime    DateTime @default(now()) // 视为完成时间
     updateTime    DateTime @updatedAt

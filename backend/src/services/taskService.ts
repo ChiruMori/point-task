@@ -1,70 +1,65 @@
 import { prisma } from '../db'
-import { User } from 'shared'
-import crypto from 'crypto'
+import { Task } from 'shared'
 
-export const findUserById = async (
-  id: number
-): Promise<Omit<User, 'pwd'> | null> => {
-  const user = await prisma.user.findUnique({
+import logger from '../utils/logger'
+import { ErrorWithStatus } from '../middleware/expHandler'
+
+export const findTaskById = async (id: number) => {
+  return prisma.task.findUnique({
     where: { id },
-    select: {
-      // 只选择需要的字段，排除密码
-      id: true,
-      uname: true,
-      role: true,
-      point: true,
+  })
+}
+
+export const listTasks = async () => {
+  // 只有管理员可以管理任务
+  return prisma.task.findMany()
+}
+
+export const createTask = async (task: Task, userId: number) => {
+  return prisma.task.create({
+    data: {
+      ...task,
+      creatorId: userId,
     },
   })
-
-  // Prisma's select会自动匹配类型，但我们显式转换一下以符合共享类型
-  return user as User | null
 }
 
-export const findUserByCredentials = async (
-  username: string,
-  password: string
-): Promise<Omit<User, 'pwd'> | null> => {
-  // 密码规则：md5(pwd+username+'salt')
-  const pwd_hash = crypto
-    .createHash('md5')
-    .update(password + username + 'salt')
-    .digest('hex')
-  const user = await prisma.user.findUnique({
-    where: { uname: username, pwd: pwd_hash },
-    select: {
-      // 只选择需要的字段，排除密码
-      id: true,
-      uname: true,
-      role: true,
-      point: true,
+export const updateTask = async (id: number, task: Partial<Task>) => {
+  const existing = await findTaskById(id)
+  if (!existing) {
+    throw new ErrorWithStatus(404, '任务不存在')
+  }
+  // 状态变更的合法性检查，仅允许从 editing -> active -> completed/expired
+  const oldStatus = existing.status
+  const newStatus = task.status || oldStatus
+  if (oldStatus !== newStatus) {
+    const validTransitions: Record<string, string[]> = {
+      editing: ['active'],
+      active: ['completed', 'expired'],
+      completed: [],
+      expired: [],
+    }
+    if (!validTransitions[oldStatus].includes(newStatus)) {
+      logger.warn(`任务状态变更不合法: ${oldStatus} -> ${newStatus}`)
+      throw new ErrorWithStatus(
+        400,
+        `任务状态不能从 ${oldStatus} 变更为 ${newStatus}`
+      )
+    }
+  }
+
+  return prisma.task.update({
+    where: { id },
+    data: {
+      ...existing,
+      ...task,
     },
   })
-
-  return user as User | null
 }
 
-const tokenExpiryMap: Map<string, number> = new Map()
-export const generateToken = (user: Omit<User, 'pwd'>): string => {
-  // 伪实现：直接返回用户ID作为token
-  // 未来这里会替换为真正的 JWT token 生成
-  const token = user.id.toString()
-  tokenExpiryMap.set(token, Date.now() + 30 * 60 * 1000) // 30分钟
-  return token
-}
-export const invalidateToken = (token: string): boolean => {
-  // 临时方案：内存中存储 id 对应的有效时间戳，超时的视为无效，每次验证时刷新
-  const expiryTime = tokenExpiryMap.get(token)
-  if (!expiryTime) {
-    return true
-  }
-
-  const isExpired = Date.now() > expiryTime
-  if (isExpired) {
-    tokenExpiryMap.delete(token)
-  } else {
-    // 刷新有效期
-    tokenExpiryMap.set(token, Date.now() + 30 * 60 * 1000) // 30分钟
-  }
-
-  return isExpired
+export const deleteTask = async (id: number) => {
+  logger.info(`删除任务 ID: ${id}`)
+  return prisma.task.delete({
+    where: { id },
+  })
 }

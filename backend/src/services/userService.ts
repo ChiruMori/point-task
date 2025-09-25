@@ -2,6 +2,11 @@ import { prisma } from '../db'
 import { User } from 'shared'
 import crypto from 'crypto'
 
+type UserSession = {
+  user: User
+  expiry: number
+}
+
 export const findUserById = async (
   id: number
 ): Promise<Omit<User, 'pwd'> | null> => {
@@ -43,28 +48,31 @@ export const findUserByCredentials = async (
   return user as User | null
 }
 
-const tokenExpiryMap: Map<string, number> = new Map()
+const tokenExpiryMap: Map<string, UserSession> = new Map()
 export const generateToken = (user: Omit<User, 'pwd'>): string => {
   // 伪实现：直接返回用户ID作为token
-  // 未来这里会替换为真正的 JWT token 生成
+  // 需替换为真正的 JWT token 生成
   const token = user.id.toString()
-  tokenExpiryMap.set(token, Date.now() + 30 * 60 * 1000) // 30分钟
+  tokenExpiryMap.set(token, { user, expiry: Date.now() + 30 * 60 * 1000 }) // 30分钟
   return token
 }
-export const invalidateToken = (token: string): boolean => {
+export const validateToken = (token: string): UserSession | null => {
   // 临时方案：内存中存储 id 对应的有效时间戳，超时的视为无效，每次验证时刷新
-  const expiryTime = tokenExpiryMap.get(token)
-  if (!expiryTime) {
-    return true
+  const session = tokenExpiryMap.get(token)
+  if (!session) {
+    return null
   }
 
-  const isExpired = Date.now() > expiryTime
+  const isExpired = Date.now() > session.expiry
   if (isExpired) {
     tokenExpiryMap.delete(token)
   } else {
     // 刷新有效期
-    tokenExpiryMap.set(token, Date.now() + 30 * 60 * 1000) // 30分钟
+    tokenExpiryMap.set(token, {
+      user: session.user,
+      expiry: Date.now() + 30 * 60 * 1000,
+    }) // 30分钟
   }
 
-  return isExpired
+  return isExpired ? null : session
 }

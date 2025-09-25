@@ -1,18 +1,44 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express'
+import * as userService from '../services/userService'
+
+import logger from '../utils/logger'
+
+const REQ_HEADER_TOKEN = 'x-auth-token'
+const LOGIN_WHITELIST = ['/api/health', '/api/user/login']
+const ADMIN_ONLY_URLS = [
+  '/api/task/list',
+  '/api/task/get',
+  '/api/task/create',
+  '/api/task/update',
+  '/api/task/delete',
+]
 
 // 伪实现：从请求头获取用户ID，并附加到请求对象上
 // 未来这里会替换为真正的 JWT token 解析和验证
 export const checkAuth = (req: Request, res: Response, next: NextFunction) => {
-  const userId = req.headers['x-user-id']; // 假设前端请求时会带上这个头
+  const path = req.path
+  if (LOGIN_WHITELIST.includes(path)) {
+    logger.info(`白名单 URL: ${path}，已跳过登录验证`)
+    return next()
+  }
+  // 拦截未登录请求（Token）
+  const requestToken = req.headers[REQ_HEADER_TOKEN] as string
+  if (!requestToken) {
+    return res.status(401).json({ message: '请登录' })
+  }
+  // 校验 Token
+  const session = userService.validateToken(requestToken)
+  if (!session) {
+    return res.status(401).json({ message: '无效的登录状态，请重新登录' })
+  }
+  // 权限检查
+  if (ADMIN_ONLY_URLS.includes(path) && session.user.role !== 'admin') {
+    return res.status(403).json({ message: '权限不足' })
+  }
 
-  // 在这里拓展 UserId 校验
-  // if (!userId || typeof userId !== 'string') {
-  //   return res.status(401).json({ message: 'Unauthorized: Missing user identity' });
-  // }
+  // 用户信息写入请求对象，供后续中间件和路由使用
+  ;(req as any).user = session.user
 
-  // 这里可以添加一个自定义类型声明来让 TypeScript 知道 req.user 存在
-  // (req as any).user = { id: parseInt(userId, 10) };
-
-  console.log(`Authenticated user: ${userId}`);
-  next();
-};
+  console.log(`Authenticated user: ${session.user.id}`)
+  next()
+}

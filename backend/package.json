@@ -17,7 +17,8 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
-    "shared": "workspace:*"
+    "shared": "workspace:*",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
