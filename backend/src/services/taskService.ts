@@ -1,5 +1,5 @@
 import { prisma } from '../db'
-import { Task } from 'shared'
+import { Task, TaskStatus } from 'shared'
 
 import logger from '../utils/logger'
 import { ErrorWithStatus } from '../middleware/expHandler'
@@ -10,9 +10,11 @@ export const findTaskById = async (id: number) => {
   })
 }
 
-export const listTasks = async () => {
-  // 只有管理员可以管理任务
-  return prisma.task.findMany()
+export const listTasks = async (status?: TaskStatus) => {
+  const where = status ? { status } : {}
+  return prisma.task.findMany({
+    where,
+  })
 }
 
 export const createTask = async (task: Task, userId: number) => {

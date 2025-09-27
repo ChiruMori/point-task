@@ -1,6 +1,8 @@
 import { prisma } from '../db'
 import { User } from 'shared'
 import crypto from 'crypto'
+import { ErrorWithStatus } from '../middleware/expHandler'
+import logger from '../utils/logger'
 
 type UserSession = {
   user: User
@@ -34,6 +36,7 @@ export const findUserByCredentials = async (
     .createHash('md5')
     .update(password + username + 'salt')
     .digest('hex')
+  logger.info(`Authenticating user ${username} with hash ${pwd_hash}`)
   const user = await prisma.user.findUnique({
     where: { uname: username, pwd: pwd_hash },
     select: {
@@ -75,4 +78,20 @@ export const validateToken = (token: string): UserSession | null => {
   }
 
   return isExpired ? null : session
+}
+
+export const addPoints = async (userId: number, points: number) => {
+  const user = await prisma.user.findUnique({ where: { id: userId } })
+  if (!user) {
+    throw new ErrorWithStatus(404, '用户不存在')
+  }
+  const newPoint = user.point + points
+  if (newPoint < 0) {
+    throw new ErrorWithStatus(400, '积分不足')
+  }
+  await prisma.user.update({
+    where: { id: userId },
+    data: { point: newPoint },
+  })
+  return newPoint
 }

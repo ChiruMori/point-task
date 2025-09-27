@@ -22,35 +22,40 @@ model User {
     role       Role     @default(normal)
     point      Int      @default(0)
     createTime DateTime @default(now())
-    updateTime DateTime @updatedAt
+    updateTime DateTime @default(now()) @updatedAt
 }
 
-enum TaskFrequency {
-    once
-    daily
-    workday
-    weekend
-    endless
-}
+// enum TaskFrequency {
+//     once
+//     daily
+//     workday
+//     weekend
+//     endless
+// }
 
 enum TaskStatus {
     editing
     active
-    completed
-    expired
+    ended
+}
+
+enum TaskType {
+    normal
+    reward
+    punish
 }
 
 model Task {
-    id         Int           @id @default(autoincrement())
+    id         Int        @id @default(autoincrement())
     title      String
     desc       String?
-    freq       TaskFrequency @default(once)
-    status     TaskStatus    @default(editing)
+    // freq       TaskFrequency @default(once)
+    status     TaskStatus @default(editing)
+    type       TaskType   @default(normal)
     creatorId  Int
     rewardId   Int
-    deadline   DateTime?
-    createTime DateTime      @default(now())
-    updateTime DateTime      @updatedAt
+    createTime DateTime   @default(now())
+    updateTime DateTime   @default(now()) @updatedAt
     // 不使用外键约束，手动管理
     // creator  User  @relation("CreatedTasks", fields: [creatorId], references: [id])
     // assignee User? @relation("AssignedTasks", fields: [assigneeId], references: [id])
@@ -62,18 +67,25 @@ model Reward {
     maxInput   Int
     minInput   Int
     createTime DateTime @default(now())
-    updateTime DateTime @updatedAt
+    updateTime DateTime @default(now()) @updatedAt
+}
+
+enum RecordStatus {
+    completed
+    failed
 }
 
 model TaskRecord {
-    id            Int      @id @default(autoincrement())
+    id            Int          @id @default(autoincrement())
     taskId        Int
     userId        Int
     score         Int // 任务完成时的评分（1-5）
     ratio         Float // 任务完成时的附加修正比例
     pointsAwarded Int // 实际奖励的积分
-    createTime    DateTime @default(now()) // 视为完成时间
-    updateTime    DateTime @updatedAt
+    remark        String // 任务完成时的备注
+    status        RecordStatus
+    createTime    DateTime     @default(now()) // 视为完成时间
+    updateTime    DateTime     @default(now()) @updatedAt
     // 不使用外键约束，手动管理
     // task Task @relation(fields: [taskId], references: [id])
     // user User @relation(fields: [userId], references: [id])

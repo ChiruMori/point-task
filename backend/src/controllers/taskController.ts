@@ -12,12 +12,12 @@ export const getTaskById = async (req: Request, res: Response) => {
   if (!task) {
     throw new ErrorWithStatus(404, '任务未找到')
   }
-  return res.status(200).json(task)
+  return res.status(200).json({ task })
 }
 
 export const listTasks = async (_: Request, res: Response) => {
   const tasks = await taskService.listTasks()
-  return res.status(200).json(tasks)
+  return res.status(200).json({ tasks })
 }
 
 export const createTask = async (req: Request, res: Response) => {
@@ -27,24 +27,24 @@ export const createTask = async (req: Request, res: Response) => {
   }
   const user = (req as any).user as User
   const task = await taskService.createTask(taskData, user.id)
-  return res.status(201).json(task)
+  return res.status(201).json({ task })
 }
 
 export const updateTask = async (req: Request, res: Response) => {
-  const tid = parseInt(req.params.tid, 10)
+  const taskData = req.body as Partial<Task>
+  const tid = taskData.id || NaN
   if (isNaN(tid)) {
     throw new ErrorWithStatus(400, '非法任务ID')
   }
-  const taskData = req.body as Partial<Task>
   const updatedTask = await taskService.updateTask(tid, taskData)
-  return res.status(200).json(updatedTask)
+  return res.status(200).json({ task: updatedTask })
 }
 
 export const deleteTask = async (req: Request, res: Response) => {
-  const tid = parseInt(req.params.tid, 10)
-  if (isNaN(tid)) {
+  const id = parseInt(req.query.id as string, 10)
+  if (isNaN(id)) {
     throw new ErrorWithStatus(400, '非法任务ID')
   }
-  await taskService.deleteTask(tid)
+  await taskService.deleteTask(id)
   return res.status(204).send()
 }

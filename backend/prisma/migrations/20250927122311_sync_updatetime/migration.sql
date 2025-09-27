@@ -1,0 +1,11 @@
+-- AlterTable
+ALTER TABLE "public"."Reward" ALTER COLUMN "updateTime" SET DEFAULT CURRENT_TIMESTAMP;
+
+-- AlterTable
+ALTER TABLE "public"."Task" ALTER COLUMN "updateTime" SET DEFAULT CURRENT_TIMESTAMP;
+
+-- AlterTable
+ALTER TABLE "public"."TaskRecord" ALTER COLUMN "updateTime" SET DEFAULT CURRENT_TIMESTAMP;
+
+-- AlterTable
+ALTER TABLE "public"."User" ALTER COLUMN "updateTime" SET DEFAULT CURRENT_TIMESTAMP;

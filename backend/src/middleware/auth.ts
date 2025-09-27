@@ -6,11 +6,18 @@ import logger from '../utils/logger'
 const REQ_HEADER_TOKEN = 'x-auth-token'
 const LOGIN_WHITELIST = ['/api/health', '/api/user/login']
 const ADMIN_ONLY_URLS = [
+  '/api/user/addPoints',
   '/api/task/list',
   '/api/task/get',
   '/api/task/create',
   '/api/task/update',
   '/api/task/delete',
+  '/api/reward/get',
+  '/api/reward/create',
+  '/api/reward/delete',
+  '/api/reward/calculate',
+  '/api/record/create',
+  '/api/record/delete',
 ]
 
 // 伪实现：从请求头获取用户ID，并附加到请求对象上
@@ -39,6 +46,6 @@ export const checkAuth = (req: Request, res: Response, next: NextFunction) => {
   // 用户信息写入请求对象，供后续中间件和路由使用
   ;(req as any).user = session.user
 
-  console.log(`Authenticated user: ${session.user.id}`)
+  logger.info(`Authenticated user: ${session.user.uname}`)
   next()
 }

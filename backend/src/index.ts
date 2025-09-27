@@ -2,8 +2,11 @@ import express, { Request, Response } from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import userRoutes from './api/userRoutes'
+import rewardRoutes from './api/rewardRoutes'
+import taskRoutes from './api/taskRoutes'
+import recordRoutes from './api/recordRoutes'
 import { checkAuth } from './middleware/auth'
-import { expHandler } from './middleware/expHandler'
+import { errorHandler } from './middleware/expHandler'
 
 dotenv.config()
 
@@ -16,8 +19,7 @@ app.use(cors())
 // 解析JSON请求体
 app.use(express.json())
 
-app.use(checkAuth)
-app.use(expHandler)
+  app.use(checkAuth)
 
 // 心跳接口
 app.get('/api/health', (req: Request, res: Response) => {
@@ -26,6 +28,10 @@ app.get('/api/health', (req: Request, res: Response) => {
 
 // 集成API路由
 app.use('/api/user', userRoutes)
+app.use('/api/reward', rewardRoutes)
+app.use('/api/task', taskRoutes)
+app.use('/api/record', recordRoutes)
+app.use(errorHandler)
 
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`)

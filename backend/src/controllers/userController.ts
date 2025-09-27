@@ -3,7 +3,7 @@ import * as userService from '../services/userService'
 import { ErrorWithStatus } from '../middleware/expHandler'
 
 export const getUserById = async (req: Request, res: Response) => {
-  const uid = parseInt(req.params.uid, 10)
+  const uid = parseInt(req.query.uid as string, 10)
   if (isNaN(uid)) {
     throw new ErrorWithStatus(400, '非法用户ID')
   }
@@ -31,4 +31,13 @@ export const login = async (req: Request, res: Response) => {
   // 生成并返回JWT
   const token = userService.generateToken(user)
   return res.status(200).json({ token })
+}
+
+export const addPoints = async (req: Request, res: Response) => {
+  const { userId, points } = req.body
+  if (typeof userId !== 'number' || typeof points !== 'number') {
+    throw new ErrorWithStatus(400, '必须提供用户ID和积分数')
+  }
+  const newPoint = await userService.addPoints(userId, points)
+  return res.status(200).json({ newPoint })
 }
