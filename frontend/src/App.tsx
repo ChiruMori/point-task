@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import Login from './pages/Login'
+import Tasks from './pages/Tasks'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 
 function App() {
   const [serverStatus, setServerStatus] = useState('Checking...')
+  const [token, setToken] = useState<string | null>(null)
+
+  // token 无效，展示 Login 组件
 
   useEffect(() => {
     fetch('/api/health') // 注意这里直接写 /api，Vite会自动代理
@@ -15,22 +18,24 @@ function App() {
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
+      {!token && <Login setToken={setToken} />}
+      <Router>
+        <div>
+          <nav>
+            <ul>
+              <li>
+                <Link to="/">Tasks</Link>
+              </li>
+            </ul>
+          </nav>
+          <Routes>
+            <Route path="/" element={<Tasks />} />
+          </Routes>
+        </div>
+      </Router>
       <div className="card">
-        <h1>Task Incentive System</h1>
         <p>Backend Status: {serverStatus}</p>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
   )
 }
