@@ -1,11 +1,12 @@
 import { Request, Response } from 'express'
 import * as userService from '../services/userService'
 import { ErrorWithStatus } from '../middleware/expHandler'
+import { User } from 'shared'
 
 export const getUserById = async (req: Request, res: Response) => {
-  const uid = parseInt(req.query.uid as string, 10)
+  let uid = parseInt(req.query.uid as string, 10)
   if (isNaN(uid)) {
-    throw new ErrorWithStatus(400, '非法用户ID')
+    uid = (req as any).user.id as number
   }
 
   const user = await userService.findUserById(uid)
@@ -14,7 +15,7 @@ export const getUserById = async (req: Request, res: Response) => {
     throw new ErrorWithStatus(404, '用户未找到')
   }
 
-  return res.status(200).json(user)
+  return res.status(200).json({ user })
 }
 
 export const login = async (req: Request, res: Response) => {
