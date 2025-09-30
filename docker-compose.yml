@@ -1,0 +1,35 @@
+services:
+
+  # 后端服务
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: point-task-backend
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://taskpoint:${POSTGRES_PASSWORD:-taskpoint123}@postgres:5432/taskpoint
+    ports:
+      - "3001:3001"
+    networks:
+      - point-task-network
+    restart: unless-stopped
+
+  # 前端服务
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: point-task-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - point-task-network
+    restart: unless-stopped
+
+
+networks:
+  point-task-network:
+    driver: bridge

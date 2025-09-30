@@ -18,12 +18,14 @@ export const errorHandler = (
 
   if (error instanceof ErrorWithStatus) {
     return res.status(error.status).json({
+      errno: error.status,
       message: error.message,
     })
   }
 
   // 默认服务器错误
   res.status(500).json({
+    errno: 500,
     message: '内部服务器错误',
   })
 }

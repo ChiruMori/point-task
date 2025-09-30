@@ -27,3 +27,6 @@ dist-ssr
 
 # Prisma generated files
 backend/src/generated/
+
+# output directory
+out

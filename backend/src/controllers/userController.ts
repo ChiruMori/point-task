@@ -42,3 +42,8 @@ export const addPoints = async (req: Request, res: Response) => {
   const newPoint = await userService.addPoints(userId, points)
   return res.status(200).json({ newPoint })
 }
+
+export const listUsers = async (req: Request, res: Response) => {
+  const users: Omit<User, 'pwd'>[] = await userService.listUsers()
+  return res.status(200).json({ users })
+}

@@ -20,7 +20,10 @@ export const calculateReward = async (rewardId: number, input: number) => {
     throw new ErrorWithStatus(404, '奖励规则不存在')
   }
   if (input > reward.maxInput || input < reward.minInput) {
-    throw new ErrorWithStatus(400, '输入数值超出设定范围')
+    throw new ErrorWithStatus(
+      400,
+      `超出范围 [${reward.minInput},${reward.maxInput}]`
+    )
   }
   // 执行 fx 字段的函数，该函数接受一个参数，名称为 x
   const func = new Function('x', reward.fx)

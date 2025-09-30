@@ -4,7 +4,7 @@ import { Task, User } from 'shared'
 import { ErrorWithStatus } from '../middleware/expHandler'
 
 export const getTaskById = async (req: Request, res: Response) => {
-  const tid = parseInt(req.params.tid, 10)
+  const tid = parseInt(req.query.tid as string, 10)
   if (isNaN(tid)) {
     throw new ErrorWithStatus(400, '非法任务ID')
   }
@@ -46,5 +46,5 @@ export const deleteTask = async (req: Request, res: Response) => {
     throw new ErrorWithStatus(400, '非法任务ID')
   }
   await taskService.deleteTask(id)
-  return res.status(204).send()
+  return res.status(200).json({ res: '任务删除成功' })
 }

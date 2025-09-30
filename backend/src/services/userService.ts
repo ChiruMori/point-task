@@ -95,3 +95,15 @@ export const addPoints = async (userId: number, points: number) => {
   })
   return newPoint
 }
+
+export const listUsers = async (): Promise<Omit<User, 'pwd'>[]> => {
+  const users = await prisma.user.findMany({
+    select: {
+      id: true,
+      uname: true,
+      role: true,
+      point: true,
+    },
+  })
+  return users as Omit<User, 'pwd'>[]
+}

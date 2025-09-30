@@ -37,9 +37,8 @@ export const updateTask = async (id: number, task: Partial<Task>) => {
   if (oldStatus !== newStatus) {
     const validTransitions: Record<string, string[]> = {
       editing: ['active'],
-      active: ['completed', 'expired'],
-      completed: [],
-      expired: [],
+      active: ['ended'],
+      ended: [],
     }
     if (!validTransitions[oldStatus].includes(newStatus)) {
       logger.warn(`任务状态变更不合法: ${oldStatus} -> ${newStatus}`)

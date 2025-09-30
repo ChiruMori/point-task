@@ -1,6 +1,7 @@
 import { TaskRecord, TaskStatus, User } from 'shared'
 import { ErrorWithStatus } from '../middleware/expHandler'
 import { Request, Response } from 'express'
+import { Prisma } from '@prisma/client'
 import { prisma } from '../db'
 import * as recordService from '../services/recordService'
 import * as userService from '../services/userService'
@@ -23,7 +24,8 @@ export const pageRecords = async (req: Request, res: Response) => {
   const pageSize = parseInt(req.query.pageSize as string, 10) || 20
   const status = (req.query.status || 'active') as TaskStatus
   const user = (req as any).user as User
-  const result = await recordService.recordPage(user.id, status, page, pageSize)
+  const uid = parseInt(req.query.uid as string, 10) || user.id
+  const result = await recordService.recordPage(uid, status, page, pageSize)
   return res.status(200).json(result)
 }
 
@@ -37,7 +39,7 @@ export const createRecord = async (req: Request, res: Response) => {
   }
   // 事务内执行
   await prisma
-    .$transaction(async (_tx) => {
+    .$transaction(async (tx: Prisma.TransactionClient) => {
       const record = await recordService.createRecord(recordData)
       // 加积分
       await userService.addPoints(recordData.userId, recordData.pointsAwarded)
@@ -51,9 +53,20 @@ export const createRecord = async (req: Request, res: Response) => {
 
 export const deleteRecord = async (req: Request, res: Response) => {
   const id = parseInt(req.query.id as string, 10)
+  const rollback = req.query.rollback !== 'false' // 默认为 true
   if (isNaN(id)) {
     throw new ErrorWithStatus(400, '非法记录ID')
   }
-  await recordService.deleteById(id)
-  return res.status(204).send()
+  // 事务内执行
+  await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const deletedRecord = await recordService.deleteById(id)
+    if (rollback) {
+      // 扣积分
+      await userService.addPoints(
+        deletedRecord.userId,
+        -deletedRecord.pointsAwarded
+      )
+    }
+  })
+  return res.status(200).json({ res: '记录删除成功' })
 }

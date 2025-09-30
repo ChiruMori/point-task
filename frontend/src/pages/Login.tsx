@@ -1,4 +1,4 @@
-import { dict } from '../utils/api'
+import { dict, registerToken } from '../utils/api'
 import Box from '@mui/material/Box'
 import Paper from '@mui/material/Paper'
 import TextField from '@mui/material/TextField'
@@ -15,7 +15,7 @@ type TimeLimitedToken = {
   deadline: number // Unix timestamp in milliseconds
 }
 
-export default function Login({ setToken }: LoginProps) {
+function Login({ setToken }: LoginProps) {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -31,6 +31,7 @@ export default function Login({ setToken }: LoginProps) {
       if (timeLimitedToken.deadline > currentTime) {
         console.log('Using stored token')
         setToken(timeLimitedToken.token)
+        registerToken(timeLimitedToken.token)
         return
       }
       console.log('Stored token expired')
@@ -57,6 +58,7 @@ export default function Login({ setToken }: LoginProps) {
             deadline,
           }
           localStorage.setItem('token', JSON.stringify(tokenData))
+          registerToken(data.token)
           setToken(data.token)
         } else {
           setError(data.message || '登录失败')
@@ -86,7 +88,17 @@ export default function Login({ setToken }: LoginProps) {
         elevation={3}
         sx={{ p: 4, display: 'flex', flexDirection: 'column', gap: 2 }}
       >
-        <Typography variant="h5" gutterBottom align="center" fontWeight="bold">
+        <Typography
+          variant="h5"
+          gutterBottom
+          align="center"
+          fontWeight="bold"
+          sx={{
+            background: 'linear-gradient(45deg, #00AAFF 30%, #00FFAA 90%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}
+        >
           Point-Task
         </Typography>
         <TextField
@@ -123,3 +135,5 @@ export default function Login({ setToken }: LoginProps) {
     </Box>
   )
 }
+
+export default Login

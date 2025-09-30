@@ -7,7 +7,6 @@ const REQ_HEADER_TOKEN = 'x-auth-token'
 const LOGIN_WHITELIST = ['/api/health', '/api/user/login']
 const ADMIN_ONLY_URLS = [
   '/api/user/addPoints',
-  '/api/task/list',
   '/api/task/get',
   '/api/task/create',
   '/api/task/update',
@@ -31,16 +30,18 @@ export const checkAuth = (req: Request, res: Response, next: NextFunction) => {
   // 拦截未登录请求（Token）
   const requestToken = req.headers[REQ_HEADER_TOKEN] as string
   if (!requestToken) {
-    return res.status(401).json({ message: '请登录' })
+    return res.status(401).json({ errno: 401, message: '请登录' })
   }
   // 校验 Token
   const session = userService.validateToken(requestToken)
   if (!session) {
-    return res.status(401).json({ message: '无效的登录状态，请重新登录' })
+    return res
+      .status(401)
+      .json({ errno: 401, message: '无效的登录状态，请重新登录' })
   }
   // 权限检查
   if (ADMIN_ONLY_URLS.includes(path) && session.user.role !== 'admin') {
-    return res.status(403).json({ message: '权限不足' })
+    return res.status(403).json({ errno: 403, message: '权限不足' })
   }
 
   // 用户信息写入请求对象，供后续中间件和路由使用

@@ -6,11 +6,13 @@ import path from 'path'
 export default defineConfig({
   plugins: [react()],
   server: {
+    host: '0.0.0.0', // 允许外部访问
+    port: 5173,
     proxy: {
       // 将所有 /api 开头的请求代理到后端的 3001 端口
       '/api': {
-        target: 'http://localhost:3001',
-        changeOrigin: true, // 需要虚拟主机站点
+        target: 'http://backend:3001', // Docker 内部网络
+        changeOrigin: true,
       },
     },
   },
@@ -19,7 +21,7 @@ export default defineConfig({
       shared: path.resolve(__dirname, '../packages/shared/src'),
     },
   },
-    optimizeDeps: {
+  optimizeDeps: {
     include: ['shared'],
   },
 })

@@ -30,7 +30,7 @@ export const deleteReward = async (req: Request, res: Response) => {
     throw new ErrorWithStatus(400, '非法奖励ID')
   }
   await rewardService.deleteById(id)
-  return res.status(204).send()
+  return res.status(200).json({ res: '奖励删除成功' })
 }
 
 export const calculateReward = async (req: Request, res: Response) => {
