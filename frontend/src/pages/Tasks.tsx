@@ -62,7 +62,7 @@ function TaskView({ role }: { role: 'admin' | 'normal' }) {
         setTasks(res.tasks)
       }
     })
-  }, [])
+  }, [role])
 
   const confirmToNextStatus = (tid: number, nxtStatus: string) => {
     let msg = ''
@@ -224,11 +224,29 @@ function TaskView({ role }: { role: 'admin' | 'normal' }) {
       </List>
 
       {role === 'admin' && (
-        <Link to="/task_info">
-          <Button fullWidth startIcon={<CreateNewFolder />} variant="contained">
-            创建任务
-          </Button>
-        </Link>
+        <Stack spacing={1} sx={{ mb: 2 }}>
+          <Link to="/task_info">
+            <Button
+              fullWidth
+              startIcon={<CreateNewFolder />}
+              variant="contained"
+            >
+              创建任务
+            </Button>
+          </Link>
+          <Link to="/new_record">
+            <Button
+              fullWidth
+              startIcon={<AddTask />}
+              variant="contained"
+              sx={{
+                bgcolor: 'success.main',
+              }}
+            >
+              新增结算
+            </Button>
+          </Link>
+        </Stack>
       )}
     </Fragment>
   )
@@ -398,7 +416,15 @@ function RecordView({
       />
       {user && user.role === 'admin' && filterStatus === 'ended' && (
         <Link to="/new_record">
-          <Button fullWidth startIcon={<AddTask />} variant="contained">
+          <Button
+            fullWidth
+            startIcon={<AddTask />}
+            variant="contained"
+            sx={{
+              bgcolor: 'success.main',
+              mb: 2,
+            }}
+          >
             新增结算
           </Button>
         </Link>

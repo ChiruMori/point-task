@@ -12,6 +12,7 @@ export default defineConfig({
       // 将所有 /api 开头的请求代理到后端的 3001 端口
       '/api': {
         target: 'http://backend:3001', // Docker 内部网络
+        // target: 'http://localhost:3001', // 本地开发环境
         changeOrigin: true,
       },
     },
