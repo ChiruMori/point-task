@@ -13,6 +13,7 @@ export default defineConfig({
       '/api': {
         target: 'http://backend:3001', // Docker 内部网络
         // target: 'http://localhost:3001', // 本地开发环境
+        // target: 'http://192.168.1.10:3001', // 本地开发环境
         changeOrigin: true,
       },
     },

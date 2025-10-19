@@ -408,7 +408,8 @@ function RecordView({
       </List>
 
       <Pagination
-        count={cnt / 20 + (cnt % 20 === 0 ? 0 : 1)}
+        count={Math.ceil(cnt / 20)}
+        variant="outlined"
         color="primary"
         sx={{ my: 2 }}
         page={page + 1}
