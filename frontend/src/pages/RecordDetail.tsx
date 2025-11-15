@@ -61,7 +61,7 @@ export default function RecordDetail() {
     }).then((res) => {
       if (res && res.message) {
         setScoreErr(res.message)
-      } else if (res && res.result) {
+      } else if (res) {
         setTotal(res.result * ratio)
         setScoreErr('')
       }
